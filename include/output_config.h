@@ -11,6 +11,16 @@
 
 #include "driver/gpio.h"
 
+#ifdef MASTER
+/** THREAD INDICATOR **/
+#define     BLINK_GPIO1         GPIO_NUM_2
+
+#define PS4_MAC_ADDRESS "14:2b:2f:c0:28:fe"
+void master_init_output_instances();
+
+#endif
+
+#ifdef SLAVE
 /** THREAD INDICATOR **/
 #define     BLINK_GPIO1         GPIO_NUM_2
 
@@ -31,8 +41,9 @@
 #define     MOTOR5_PWM          GPIO_NUM_19
 #define     MOTOR5_DIR          GPIO_NUM_21
 
-// void master_init_output_instances();
-// void slave_init_output_instances();
+void slave_init_output_instances();
+
+#endif
 
 #endif
  

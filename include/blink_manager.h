@@ -9,7 +9,12 @@
 #ifndef __BLINK_MANAGER_H__
 #define __BLINK_MANAGER_H__
 
+#ifdef MASTER
 void master_thread_indicator(void *pvParameters);
+#endif
+
+#ifdef SLAVE
 void slave_thread_indicator(void *pvParameters);
+#endif
 
 #endif

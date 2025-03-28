@@ -9,7 +9,13 @@
 #ifndef __THREAD_MANAGER_H__
 #define __THREAD_MANAGER_H__
 
+#ifdef MASTER
 void master_thread_manager();
+#endif
+
+#ifdef SLAVE
 void slave_thread_manager();
+#endif
+
 
 #endif
