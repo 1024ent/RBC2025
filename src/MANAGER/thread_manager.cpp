@@ -14,6 +14,8 @@
 #include "master.h"
 #include "slave.h"
 
+#ifdef MASTER
+
 /** 
  * @brief Task handles for managing different threads 
  */
@@ -51,17 +53,10 @@ void master_thread_manager()
                             1, 
                             NULL, 
                             0);
-
-    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
-    xTaskCreatePinnedToCore(sendTask, 
-                            "Sending Task...", 
-                            2048, 
-                            NULL, 
-                            1, 
-                            NULL, 
-                            1);
 }
+#endif
 
+#ifdef SLAVE
 void slave_thread_manager()
 {
     /**
@@ -104,15 +99,5 @@ void slave_thread_manager()
     //     1, 
     //     &myLogging, 
     //     1);
-
-    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
-    xTaskCreatePinnedToCore(uart_event_task, 
-        "Receiving Uart Event Task...", 
-        8192, 
-        NULL, 
-        5, 
-        NULL, 
-        1);
 }
-  
- 
+#endif

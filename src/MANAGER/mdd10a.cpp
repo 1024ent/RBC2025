@@ -14,6 +14,7 @@
 #define SPEED_MID 20000
 #define SPEED_MIN 0
 
+#ifdef SLAVE
 motor m1;
 
 void init_mdd10a_instances()
@@ -52,3 +53,4 @@ void mdd10a_man_move_none()
 {
     m1.man_move(LOW, SPEED_MIN);
 }
+#endif

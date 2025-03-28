@@ -15,7 +15,7 @@
 #define SPEED_MID 200
 #define SPEED_MIN 0
 
-
+#ifdef SLAVE
 void robot_movement_mecanum(void *parameter)
 {
     bool shareButtonPressed = false;
@@ -234,3 +234,4 @@ void robot_movement_mecanum(void *parameter)
         }
     }
 }
+#endif

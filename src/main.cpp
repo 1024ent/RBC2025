@@ -6,13 +6,13 @@
  */
 
 #include <Arduino.h>
-// #include "input_config.h"   // Handles input configurations
-// #include "output_config.h"  // Handles output configurations
+#include "input_config.h"   // Handles input configurations
+#include "output_config.h"  // Handles output configurations
 #include "thread_manager.h" // Manages task/thread execution
-// #include "uart_manager.h"   // Manages UART communication
+#include "uart_manager.h"   // Manages UART communication
 
 #ifdef MASTER
-#include "master.h"  // Uncomment if additional master-specific code is needed
+// #include "master.h"  // Uncomment if additional master-specific code is needed
 
 /**
  * @brief Master MCU Setup Function
@@ -36,7 +36,7 @@ void loop() {
 #endif
 
 #ifdef SLAVE
-#include "slave.h"  // Uncomment if additional slave-specific code is needed
+// #include "slave.h"  // Uncomment if additional slave-specific code is needed
 
 /**
  * @brief Slave MCU Setup Function
