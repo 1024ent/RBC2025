@@ -5,7 +5,6 @@
  * @license Apache-2.0
  * @author Loo Hui Kie [ELPROG]
  */
-
 #ifndef __BLINK_MANAGER_H__
 #define __BLINK_MANAGER_H__
 

@@ -11,17 +11,18 @@
 #include "blink_manager.h"
 #include "sdkconfig.h"
 #include "uart_manager.h"
-#include "master.h"
-#include "slave.h"
 
 #ifdef MASTER
-
+#include "master.h"
+#include "controller_manager.h"
 /** 
  * @brief Task handles for managing different threads 
  */
 TaskHandle_t myThreadIndicator = NULL;
 TaskHandle_t myUART = NULL;
 TaskHandle_t myLogging = NULL;
+TaskHandle_t myController = NULL;
+TaskHandle_t myControllerLed = NULL;
 
 /**
  * @brief Initializes and creates tasks for concurrent execution.
@@ -45,20 +46,39 @@ void master_thread_manager()
      *          )
      */
 
-    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
+    // Task for blinking an LED to indicate system status 
     xTaskCreatePinnedToCore(master_thread_indicator, 
                             "Blinking LED", 
-                            2048, 
+                            1024, 
                             NULL, 
                             1, 
+                            NULL, 
+                            0);
+    
+    // Task for blinking an LED to indicate system status 
+    xTaskCreatePinnedToCore(controller_manager, 
+                            "Managing controller", 
+                            4096, 
+                            NULL, 
+                            3, 
+                            NULL, 
+                            0);
+    
+    // Task for blinking an LED to indicate system status 
+    xTaskCreatePinnedToCore(controller_led_sequence, 
+                            "Managing controller led sequence", 
+                            4096, 
+                            NULL, 
+                            2, 
                             NULL, 
                             0);
 }
 #endif
 
 #ifdef SLAVE
-void slave_thread_manager()
-{
+#include "slave.h"
+
+void slave_thread_manager() {
     /**
      * @brief Creating FreeRTOS tasks and assigning them to cores.
      * 
@@ -89,15 +109,6 @@ void slave_thread_manager()
     //     NULL, 
     //     tskIDLE_PRIORITY, 
     //     &myUART, 
-    //     1);
-
-    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
-    // xTaskCreatePinnedToCore(parse_value, 
-    //     "Logging current status", 
-    //     8192, 
-    //     NULL, 
-    //     1, 
-    //     &myLogging, 
     //     1);
 }
 #endif

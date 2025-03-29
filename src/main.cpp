@@ -9,7 +9,6 @@
 #include "input_config.h"   // Handles input configurations
 #include "output_config.h"  // Handles output configurations
 #include "thread_manager.h" // Manages task/thread execution
-#include "uart_manager.h"   // Manages UART communication
 
 #ifdef MASTER
 // #include "master.h"  // Uncomment if additional master-specific code is needed
