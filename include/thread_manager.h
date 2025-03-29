@@ -3,6 +3,7 @@
  * @brief Spawning applicaton threads
  * @copyright UMPSA ROBOTICS
  * @license Apache-2.0
+ * @author Nazwa Najmuddin [ELPROG]
  * @author Loo Hui Kie [ELPROG]
  */
 

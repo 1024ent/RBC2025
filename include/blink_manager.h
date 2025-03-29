@@ -3,6 +3,7 @@
  * @brief Managing thread indicator
  * @copyright UMPSA ROBOTICS
  * @license Apache-2.0
+ * @author Nazwa Najmuddin [ELPROG]
  * @author Loo Hui Kie [ELPROG]
  */
 
@@ -17,4 +18,5 @@ void master_thread_indicator(void *pvParameters);
 void slave_thread_indicator(void *pvParameters);
 #endif
 
-#endif
+#endif // __BLINK_MANAGER_H__
+ 

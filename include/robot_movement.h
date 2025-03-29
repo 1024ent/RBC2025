@@ -69,4 +69,4 @@ public:
     }
 };
 
-void robot_movement_mecanum(void *parameter);
+void robot_movement_omni(void *parameter);

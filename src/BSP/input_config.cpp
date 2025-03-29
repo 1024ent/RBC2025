@@ -1,10 +1,11 @@
-// /**
-//  * @file input_config.cpp
-//  * @brief Input pins instances configuration
-//  * @copyright UMPSA ROBOTICS
-//  * @license Apache-2.0
-//  * @author Loo Hui Kie [ELPROG]
-//  */
+/**
+ * @file input_config.cpp
+ * @brief Input pins instances configuration
+ * @copyright UMPSA ROBOTICS
+ * @license Apache-2.0
+ * @author Nazwa Najmuddin [ELPROG]
+ * @author Loo Hui Kie [ELPROG]
+ */
 
 #include <Arduino.h>
 #include "driver/gpio.h"
