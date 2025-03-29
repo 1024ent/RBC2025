@@ -38,11 +38,11 @@
 
 #ifdef MASTER
     /**
-     * @brief Parsing values from buttons and send to STM32 through UART
+     * @brief Parsing values from buttons and send to ESP32 Slave Board through UART 
      */
     void send_and_parse_value(void *parameter) {
         ps4_buttons btn;
-        btn.uart_init(TX2, RX2);
+        btn.uart_init(UART2_TX_PIN, UART2_RX_PIN);
 
         bool shareButtonPressed = false;
         bool optionsButtonPressed = false;
@@ -92,29 +92,75 @@
                     shareButtonPressed = false;
                     optionsButtonPressed = true;
                 }
-                if (shareButtonPressed == 1)
+                if (shareButtonPressed)
                 {
+                    // Add logic here if needed
                 }
-                else if (optionsButtonPressed == 1)
+                else if (optionsButtonPressed)
                 {
+                    // Add logic here if needed
                 }
-            }
-        }
-    }
 
-    void parse_value(void *parameter) {
-        for (;;)
-        {
-            if (Serial2.available())
-            {
-                int receivedValue = Serial2.parseInt();
-                Serial.printf("[UART_MANAGER] Mechanism running STM32 MB : %d\n", receivedValue);
+                // Send analog stick values
+                int lx = PS4.LStickX();
+                int ly = PS4.LStickY();
+                Serial2.printf("LX:%d\n", lx);
+                Serial2.printf("LY:%d\n", ly);
+                
+                Serial.printf("[MASTER] SENT LX:%d LY:%d\n", lx, ly);
             }
-            vTaskDelay(pdMS_TO_TICKS(100));
+            vTaskDelay(pdMS_TO_TICKS(50));  // Small delay to avoid flooding UART
         }
     }
 #endif
 
 #ifdef SLAVE
+#include "uart_manager.h"
+#include "output_config.h"
 
+// Global variables definition
+int LStickX = 0;
+int LStickY = 0;
+int buttonValue = 0;
+
+void uart_receive_task(void *parameter) {
+    Serial2.begin(115200, SERIAL_8N1, UART2_RX_PIN, UART2_TX_PIN);
+    char receivedData[32];  // Increased buffer size
+    int index = 0;
+
+    for (;;) {
+        while (Serial2.available() > 0) {
+            char incomingByte = Serial2.read();
+
+            if (incomingByte == '\n') {
+                receivedData[index] = '\0';
+                
+                // Parse LX values
+                if (strncmp(receivedData, "LX:", 3) == 0) {
+                    LStickX = atoi(receivedData + 3);
+                    Serial.printf("[UART] LX: %d\n", LStickX);
+                }
+                // Parse LY values
+                else if (strncmp(receivedData, "LY:", 3) == 0) {
+                    LStickY = atoi(receivedData + 3);
+                    Serial.printf("[UART] LY: %d\n", LStickY);
+                }
+                // Parse button values (simple integers)
+                else {
+                    buttonValue = atoi(receivedData);
+                    if (buttonValue != 0) {  // Filter out accidental zeros
+                        Serial.printf("[UART] BTN: %d\n", buttonValue);
+                    }
+                }
+                
+                index = 0;  // Reset buffer
+            } else {
+                if (index < sizeof(receivedData) - 1) {
+                    receivedData[index++] = incomingByte;
+                }
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
 #endif

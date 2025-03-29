@@ -19,7 +19,6 @@
  * @brief Task handles for managing different threads 
  */
 TaskHandle_t myThreadIndicator = NULL;
-TaskHandle_t myUART = NULL;
 TaskHandle_t myLogging = NULL;
 TaskHandle_t myController = NULL;
 TaskHandle_t myControllerLed = NULL;
@@ -52,7 +51,7 @@ void master_thread_manager()
                             1024, 
                             NULL, 
                             1, 
-                            NULL, 
+                            &myThreadIndicator, 
                             0);
     
     // Task for blinking an LED to indicate system status 
@@ -61,7 +60,7 @@ void master_thread_manager()
                             4096, 
                             NULL, 
                             3, 
-                            NULL, 
+                            &myController, 
                             0);
     
     // Task for blinking an LED to indicate system status 
@@ -70,13 +69,25 @@ void master_thread_manager()
                             4096, 
                             NULL, 
                             2, 
-                            NULL, 
+                            &myControllerLed, 
                             0);
+
+    // Task for blinking an LED to indicate system status 
+    xTaskCreatePinnedToCore(send_and_parse_value, 
+                            "Connecting to UART ...", 
+                            10000, 
+                            NULL, 
+                            3, 
+                            &myLogging, 
+                            1);
 }
 #endif
 
 #ifdef SLAVE
 #include "slave.h"
+#include "robot_movement.h"
+TaskHandle_t myUART = NULL;
+TaskHandle_t myMovement = NULL;
 
 void slave_thread_manager() {
     /**
@@ -102,13 +113,22 @@ void slave_thread_manager() {
                             NULL, 
                             0);
 
-    // // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
-    // xTaskCreatePinnedToCore(send_and_parse_value, 
-    //     "Connecting to UART ...", 
-    //     8192, 
-    //     NULL, 
-    //     tskIDLE_PRIORITY, 
-    //     &myUART, 
-    //     1);
+    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(uart_receive_task, 
+                            "Receiving UART TASK ...", 
+                            10000, 
+                            NULL, 
+                            5, 
+                            &myUART, 
+                            0);
+
+    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(robot_movement_omni, 
+                            "Connecting to base ...", 
+                            75000, 
+                            NULL, 
+                            tskIDLE_PRIORITY, 
+                            &myMovement, 
+                            1);    
 }
 #endif
