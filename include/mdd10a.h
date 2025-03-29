@@ -7,6 +7,9 @@
  * @author Kishan Kumar [ELPROG]
  */
 
+#ifndef __MDD10A_H__
+#define __MDD10A_H__
+
 #include <Arduino.h>
 class motor
 {
@@ -70,3 +73,5 @@ void mdd10a_none();
 void mdd10a_man_move_cw();
 void mdd10a_man_move_ccw();
 void mdd10a_man_move_none();
+
+#endif 

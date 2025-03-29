@@ -10,9 +10,7 @@
 #define __INPUT_CONFIG_H__
 
 #ifdef MASTER
-/** INPUT PINS DECLARATION */
 #define PS4_MAC_ADDRESS "a8:42:e3:8f:fa:06"
-
 void master_init_input_instances();
 #endif
 
@@ -20,4 +18,4 @@ void master_init_input_instances();
 void slave_init_input_instances();
 #endif
 
-#endif
+#endif // __INPUT_CONFIG_H__

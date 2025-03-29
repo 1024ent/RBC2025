@@ -5,6 +5,7 @@
  * @license Apache-2.0
  * @author Nazwa Najmuddin [ELPROG]
  * @author Kishan Kumar [ELPROG]
+ * @author Loo Hui Kie [ELPROG]
  */
 
 #include "robot_movement.h"
@@ -69,6 +70,111 @@ void robot_movement_omni(void *parameter)
             m4.set_spin(SPEED_MAX);
             Serial.println("Robot Backward");
         }
+        else if ((PS4.LStickX() < -5) && (PS4.LStickY() < 29) && (PS4.LStickY() > -29))
+        {
+            m1.set_direction(HIGH);
+            m1.set_spin(SPEED_MAX);
+            m2.set_direction(HIGH);
+            m2.set_spin(SPEED_MAX);
+            m3.set_direction(LOW);
+            m3.set_spin(SPEED_MAX);
+            m4.set_direction(LOW);
+            m4.set_spin(SPEED_MAX);
+
+            Serial.println("Robot Left");
+        }
+        else if ((PS4.LStickX() > 5) && (PS4.LStickY() < 29) && (PS4.LStickY() > -29))
+        {
+            m1.set_direction(LOW);
+            m1.set_spin(SPEED_MAX);
+            m2.set_direction(LOW);
+            m2.set_spin(SPEED_MAX);
+            m3.set_direction(HIGH);
+            m3.set_spin(SPEED_MAX);
+            m4.set_direction(HIGH);
+            m4.set_spin(SPEED_MAX);
+
+            Serial.println("Robot Right");
+        }
+        else if ((PS4.LStickY() > 5) && (PS4.LStickX() < -30) && (PS4.LStickX() > -127))
+        {
+            m1.set_direction(LOW);
+            m1.set_spin(SPEED_MIN);
+            m2.set_direction(HIGH);
+            m2.set_spin(SPEED_MAX);
+            m3.set_direction(LOW);
+            m3.set_spin(SPEED_MAX);
+            m4.set_direction(HIGH);
+            m4.set_spin(SPEED_MIN);
+
+            Serial.println("Robot Diagonal Top Left!\n");
+        }
+        else if ((PS4.LStickX() > 5) && (PS4.LStickY() < 127) && (PS4.LStickY() > 30))
+        {
+            m1.set_direction(LOW);
+            m1.set_spin(SPEED_MAX);
+            m2.set_direction(HIGH);
+            m2.set_spin(SPEED_MIN);
+            m3.set_direction(LOW);
+            m3.set_spin(SPEED_MIN);
+            m4.set_direction(HIGH);
+            m4.set_spin(SPEED_MAX);
+
+            Serial.println("Robot Diagonal Top Right!\n");
+        }
+        else if ((PS4.LStickY() < -5) && (PS4.LStickX() < 127) && (PS4.LStickX() > 30))
+        {
+            m1.set_direction(HIGH);
+            m1.set_spin(SPEED_MIN);
+            m2.set_direction(LOW);
+            m2.set_spin(SPEED_MAX);
+            m3.set_direction(HIGH);
+            m3.set_spin(SPEED_MAX);
+            m4.set_direction(LOW);
+            m4.set_spin(SPEED_MIN);
+
+            Serial.println("Robot Diagonal Bottom Right!\n");
+        }
+        else if ((PS4.LStickX() < -5) && (PS4.LStickY() < -30) && (PS4.LStickY() > -127))
+        {
+            m1.set_direction(HIGH);
+            m1.set_spin(SPEED_MAX);
+            m2.set_direction(LOW);
+            m2.set_spin(SPEED_MIN);
+            m3.set_direction(HIGH);
+            m3.set_spin(SPEED_MIN);
+            m4.set_direction(LOW);
+            m4.set_spin(SPEED_MAX);
+
+            Serial.println("Robot Diagonal Bottom Left!\n");
+        }
+        else if (PS4.RStickX() > 45)
+        {
+            m1.set_direction(LOW);
+            m1.set_spin(SPEED_MAX);
+            m2.set_direction(LOW);
+            m2.set_spin(SPEED_MAX);
+            m3.set_direction(LOW);
+            m3.set_spin(SPEED_MAX);
+            m4.set_direction(LOW);
+            m4.set_spin(SPEED_MAX);
+
+            Serial.println("Robot Rotate CW");
+        }
+        if (PS4.RStickX() < -45)
+        {
+
+            m1.set_direction(HIGH);
+            m1.set_spin(SPEED_MAX);
+            m2.set_direction(HIGH);
+            m2.set_spin(SPEED_MAX);
+            m3.set_direction(HIGH);
+            m3.set_spin(SPEED_MAX);
+            m4.set_direction(HIGH);
+            m4.set_spin(SPEED_MAX);
+
+            Serial.println("Robot Rotate CCW");
+        }        
         else
         {
             m1.set_spin(SPEED_MIN);
