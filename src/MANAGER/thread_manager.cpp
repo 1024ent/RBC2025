@@ -87,6 +87,7 @@ void master_thread_manager()
 #ifdef SLAVE
 #include "slave.h"
 #include "robot_movement.h"
+#include "dribbling.h"
 TaskHandle_t myUART = NULL;
 TaskHandle_t myMovement = NULL;
 
@@ -130,6 +131,15 @@ void slave_thread_manager() {
                             NULL, 
                             tskIDLE_PRIORITY, 
                             &myMovement, 
-                            1);    
+                            1); 
+                            
+    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(dribbling_mechanism, 
+                            "Running Dribbling Mechanism ...", 
+                            10000, 
+                            NULL, 
+                            tskIDLE_PRIORITY, 
+                            NULL, 
+                            1); 
 }
 #endif

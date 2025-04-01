@@ -46,6 +46,19 @@ void master_init_output_instances();
 #define     MOTOR5_PWM          GPIO_NUM_19
 #define     MOTOR5_DIR          GPIO_NUM_21
 
+/** TB6600 STEPPER MOTOR CONTROL PINS **/
+#define     STEPPER1_PUL        GPIO_NUM_12
+#define     STEPPER1_DIR        GPIO_NUM_13
+
+#define     STEPPER2_PUL        GPIO_NUM_15
+#define     STEPPER2_DIR        GPIO_NUM_16
+
+#define     STEPPER3_PUL        GPIO_NUM_17
+#define     STEPPER3_DIR        GPIO_NUM_18
+
+#define     STEPPER4_PUL        GPIO_NUM_22
+#define     STEPPER4_DIR        GPIO_NUM_23
+
 /** UART2 | Receiving: ESP32 MB **/
 #define UART2_TX_PIN GPIO_NUM_17  
 #define UART2_RX_PIN GPIO_NUM_16  
