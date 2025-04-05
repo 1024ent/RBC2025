@@ -13,41 +13,52 @@
 #include "stepper.h"
 
 #ifdef SLAVE
-extern int buttonValue;  // Import button value
+extern int buttonValue;  // Shared variable updated by UART receive function
 
 void dribbling_mechanism(void *parameter) {
     Stepper stepper(Stepper::DRIVER, STEPPER1_PUL, STEPPER1_DIR);
 
-    unsigned long previousMillis = 0;
-    const long interval = 10000;  // 10 seconds
-    int direction = 1;  // 1 for clockwise, -1 for anti-clockwise
+    const long runDuration = 5000;  // 5 seconds
+    bool hasRun = false;            // To prevent repeating unless button is pressed again
 
-    // Set stepper motor parameters
-    stepper.setMaxSpeed(1000);    // Max speed (steps per second)
-    stepper.setAcceleration(500); // Acceleration (steps per second squared)
+    // Stepper motor settings
+    stepper.setMaxSpeed(1000);      // max speed in steps/sec
+    stepper.setAcceleration(500);   // acceleration in steps/sec^2
 
-    // Move the motor clockwise for 10 seconds
-    unsigned long startTime = millis();
+    for (;;) {
+        int currentBtn = buttonValue;
 
-    for(;;) {
-        unsigned long currentMillis = millis();
+        if (currentBtn == 6 && !hasRun) {  // Triangle button pressed and not run yet
+            hasRun = true;
 
-        // Change direction every 10 seconds
-        if (currentMillis - previousMillis >= interval) {
-          previousMillis = currentMillis;
-          direction *= -1;  // Toggle direction
+            // Run CW for 5 seconds
+            unsigned long startTime = millis();
+            while (millis() - startTime < runDuration) {
+                stepper.setSpeed(1000);
+                stepper.runSpeed();
+                vTaskDelay(1);
+            }
+
+            // Run CCW for 5 seconds
+            startTime = millis();
+            while (millis() - startTime < runDuration) {
+                stepper.setSpeed(-1000);
+                stepper.runSpeed();
+                vTaskDelay(1);
+            }
+
+            // Stop the motor
+            stepper.setSpeed(0);
         }
-      
-        // Set the motor speed based on the direction
-        if (direction == 1) {
-          stepper.setSpeed(1000);  // Set clockwise speed
-        } else {
-          stepper.setSpeed(-1000);  // Set anti-clockwise speed
+
+        // Reset hasRun flag when button is released
+        if (currentBtn != 6) {
+            hasRun = false;
         }
-      
-        // Run the motor continuously in the set direction
-        stepper.runSpeed();        
+
+        vTaskDelay(10);  // Small delay to let CPU breathe
     }
 }
-
 #endif
+ 
+ 

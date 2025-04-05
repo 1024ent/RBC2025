@@ -15,6 +15,7 @@
 
 #ifdef MASTER
 #include "master.h"
+#include "robot_movement.h"
 #include "controller_manager.h"
 /** 
  * @brief Task handles for managing different threads 
@@ -23,6 +24,7 @@ TaskHandle_t myThreadIndicator = NULL;
 TaskHandle_t myLogging = NULL;
 TaskHandle_t myController = NULL;
 TaskHandle_t myControllerLed = NULL;
+TaskHandle_t myMovement = NULL;
 
 /**
  * @brief Initializes and creates tasks for concurrent execution.
@@ -69,7 +71,7 @@ void master_thread_manager()
                             "Managing controller led sequence", 
                             4096, 
                             NULL, 
-                            2, 
+                            1, 
                             &myControllerLed, 
                             0);
 
@@ -80,16 +82,23 @@ void master_thread_manager()
                             NULL, 
                             3, 
                             &myLogging, 
+                            0); 
+
+    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(robot_movement_omni, 
+                            "Connecting to base ...", 
+                            75000, 
+                            NULL, 
+                            2, 
+                            &myMovement, 
                             1);
 }
 #endif
 
 #ifdef SLAVE
 #include "slave.h"
-#include "robot_movement.h"
 #include "dribbling.h"
 TaskHandle_t myUART = NULL;
-TaskHandle_t myMovement = NULL;
 
 void slave_thread_manager() {
     /**
@@ -123,22 +132,13 @@ void slave_thread_manager() {
                             5, 
                             &myUART, 
                             0);
-
-    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
-    xTaskCreatePinnedToCore(robot_movement_omni, 
-                            "Connecting to base ...", 
-                            75000, 
-                            NULL, 
-                            tskIDLE_PRIORITY, 
-                            &myMovement, 
-                            1); 
                             
     // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
     xTaskCreatePinnedToCore(dribbling_mechanism, 
                             "Running Dribbling Mechanism ...", 
                             10000, 
                             NULL, 
-                            tskIDLE_PRIORITY, 
+                            3, 
                             NULL, 
                             1); 
 }
