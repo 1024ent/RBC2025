@@ -10,12 +10,8 @@
 
 #include "robot_movement.h"
 #include "output_config.h"
-#include "uart_manager.h"
 
-#ifdef SLAVE
-extern int LStickX;  // Import from uart_manager.cpp
-extern int LStickY;  // Import from uart_manager.cpp
-extern int buttonValue;  // Import button value
+#ifdef MASTER 
 
 #define DEADZONE 15
 #define SPEED_MAX 255
@@ -33,158 +29,138 @@ void robot_movement_omni(void *parameter)
 
     for (;;)
     {
-        // Get latest values from UART task
-        int currentLX = LStickX;
-        int currentLY = LStickY;
-        int currentBtn = buttonValue;  // Available for future use
-        
-        // Debug output
-        Serial.printf("[MOTION] LX:%d LY:%d BTN:%d\n", currentLX, currentLY, currentBtn);
-
-        // Apply deadzone
-        if (abs(currentLX) < DEADZONE) currentLX = 0;
-        if (abs(currentLY) < DEADZONE) currentLY = 0;
-
-        // Now, use LStickX and LStickY for movement
-        if ((LStickY > 5) && (LStickX < 29) && (LStickX > -29))
+        if (PS4.isConnected())
         {
-            m1.set_direction(LOW);
-            m1.set_spin(SPEED_MAX);
-            m2.set_direction(HIGH);
-            m2.set_spin(SPEED_MAX);
-            m3.set_direction(LOW);
-            m3.set_spin(SPEED_MAX);
-            m4.set_direction(HIGH);
-            m4.set_spin(SPEED_MAX);
-            Serial.println("Robot Forward");
+            int lx = PS4.LStickX();
+            int ly = PS4.LStickY();
+            int rx = PS4.RStickX();
+
+            // Apply deadzone
+            if (abs(lx) < DEADZONE) lx = 0;
+            if (abs(ly) < DEADZONE) ly = 0;
+            if (abs(rx) < DEADZONE) rx = 0;
+
+            // Forward
+            if ((ly > 0) && (lx < 29) && (lx > -29))
+            {
+                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
+                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
+                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
+                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
+
+                Serial.println("Robot Forward");
+            }
+
+            // Backward
+            else if ((ly < 0) && (lx < 29) && (lx > -29))
+            {
+                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
+                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
+                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
+                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
+
+                Serial.println("Robot Backward");
+            }
+
+            // Left
+            else if ((lx < 0) && (ly < 29) && (ly > -29))
+            {
+                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
+                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
+                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
+                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
+
+                Serial.println("Robot Left");
+            }
+
+            // Right
+            else if ((lx > 0) && (ly < 29) && (ly > -29))
+            {
+                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
+                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
+                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
+                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
+
+                Serial.println("Robot Right");
+            }
+
+            // Diagonal Top Left
+            else if ((ly > 0) && (lx < -30))
+            {
+                m1.set_direction(LOW);  m1.set_spin(SPEED_MIN);
+                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
+                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
+                m4.set_direction(HIGH); m4.set_spin(SPEED_MIN);
+
+                Serial.println("Robot Diagonal Top Left!\n");
+            }
+
+            // Diagonal Top Right
+            else if ((lx > 0) && (ly > 30))
+            {
+                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
+                m2.set_direction(HIGH); m2.set_spin(SPEED_MIN);
+                m3.set_direction(LOW);  m3.set_spin(SPEED_MIN);
+                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
+
+                Serial.println("Robot Diagonal Top Right!\n");
+            }
+
+            // Diagonal Bottom Right
+            else if ((ly < 0) && (lx > 30))
+            {
+                m1.set_direction(HIGH); m1.set_spin(SPEED_MIN);
+                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
+                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
+                m4.set_direction(LOW);  m4.set_spin(SPEED_MIN);
+
+                Serial.println("Robot Diagonal Bottom Right!\n");
+            }
+
+            // Diagonal Bottom Left
+            else if ((lx < 0) && (ly < -30))
+            {
+                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
+                m2.set_direction(LOW);  m2.set_spin(SPEED_MIN);
+                m3.set_direction(HIGH); m3.set_spin(SPEED_MIN);
+                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
+
+                Serial.println("Robot Diagonal Bottom Left!\n");
+            }
+
+            // Rotate CW
+            else if (rx > 45)
+            {
+                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
+                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
+                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
+                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
+
+                Serial.println("Robot Rotate CW");
+            }
+
+            // Rotate CCW
+            else if (rx < -45)
+            {
+                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
+                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
+                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
+                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
+
+                Serial.println("Robot Rotate CCW");
+            }
+
+            // Stop if everything is within deadzone
+            else
+            {
+                m1.set_spin(SPEED_MIN);
+                m2.set_spin(SPEED_MIN);
+                m3.set_spin(SPEED_MIN);
+                m4.set_spin(SPEED_MIN);
+                //Serial.println("Robot STOP");
+            }
         }
-        else if ((LStickY < -5) && (LStickX < 29) && (LStickX > -29))
-        {
-            m1.set_direction(HIGH);
-            m1.set_spin(SPEED_MAX);
-            m2.set_direction(LOW);
-            m2.set_spin(SPEED_MAX);
-            m3.set_direction(HIGH);
-            m3.set_spin(SPEED_MAX);
-            m4.set_direction(LOW);
-            m4.set_spin(SPEED_MAX);
-            Serial.println("Robot Backward");
-        }
-        else if ((PS4.LStickX() < -5) && (PS4.LStickY() < 29) && (PS4.LStickY() > -29))
-        {
-            m1.set_direction(HIGH);
-            m1.set_spin(SPEED_MAX);
-            m2.set_direction(HIGH);
-            m2.set_spin(SPEED_MAX);
-            m3.set_direction(LOW);
-            m3.set_spin(SPEED_MAX);
-            m4.set_direction(LOW);
-            m4.set_spin(SPEED_MAX);
-
-            Serial.println("Robot Left");
-        }
-        else if ((PS4.LStickX() > 5) && (PS4.LStickY() < 29) && (PS4.LStickY() > -29))
-        {
-            m1.set_direction(LOW);
-            m1.set_spin(SPEED_MAX);
-            m2.set_direction(LOW);
-            m2.set_spin(SPEED_MAX);
-            m3.set_direction(HIGH);
-            m3.set_spin(SPEED_MAX);
-            m4.set_direction(HIGH);
-            m4.set_spin(SPEED_MAX);
-
-            Serial.println("Robot Right");
-        }
-        else if ((PS4.LStickY() > 5) && (PS4.LStickX() < -30) && (PS4.LStickX() > -127))
-        {
-            m1.set_direction(LOW);
-            m1.set_spin(SPEED_MIN);
-            m2.set_direction(HIGH);
-            m2.set_spin(SPEED_MAX);
-            m3.set_direction(LOW);
-            m3.set_spin(SPEED_MAX);
-            m4.set_direction(HIGH);
-            m4.set_spin(SPEED_MIN);
-
-            Serial.println("Robot Diagonal Top Left!\n");
-        }
-        else if ((PS4.LStickX() > 5) && (PS4.LStickY() < 127) && (PS4.LStickY() > 30))
-        {
-            m1.set_direction(LOW);
-            m1.set_spin(SPEED_MAX);
-            m2.set_direction(HIGH);
-            m2.set_spin(SPEED_MIN);
-            m3.set_direction(LOW);
-            m3.set_spin(SPEED_MIN);
-            m4.set_direction(HIGH);
-            m4.set_spin(SPEED_MAX);
-
-            Serial.println("Robot Diagonal Top Right!\n");
-        }
-        else if ((PS4.LStickY() < -5) && (PS4.LStickX() < 127) && (PS4.LStickX() > 30))
-        {
-            m1.set_direction(HIGH);
-            m1.set_spin(SPEED_MIN);
-            m2.set_direction(LOW);
-            m2.set_spin(SPEED_MAX);
-            m3.set_direction(HIGH);
-            m3.set_spin(SPEED_MAX);
-            m4.set_direction(LOW);
-            m4.set_spin(SPEED_MIN);
-
-            Serial.println("Robot Diagonal Bottom Right!\n");
-        }
-        else if ((PS4.LStickX() < -5) && (PS4.LStickY() < -30) && (PS4.LStickY() > -127))
-        {
-            m1.set_direction(HIGH);
-            m1.set_spin(SPEED_MAX);
-            m2.set_direction(LOW);
-            m2.set_spin(SPEED_MIN);
-            m3.set_direction(HIGH);
-            m3.set_spin(SPEED_MIN);
-            m4.set_direction(LOW);
-            m4.set_spin(SPEED_MAX);
-
-            Serial.println("Robot Diagonal Bottom Left!\n");
-        }
-        else if (PS4.RStickX() > 45)
-        {
-            m1.set_direction(LOW);
-            m1.set_spin(SPEED_MAX);
-            m2.set_direction(LOW);
-            m2.set_spin(SPEED_MAX);
-            m3.set_direction(LOW);
-            m3.set_spin(SPEED_MAX);
-            m4.set_direction(LOW);
-            m4.set_spin(SPEED_MAX);
-
-            Serial.println("Robot Rotate CW");
-        }
-        if (PS4.RStickX() < -45)
-        {
-
-            m1.set_direction(HIGH);
-            m1.set_spin(SPEED_MAX);
-            m2.set_direction(HIGH);
-            m2.set_spin(SPEED_MAX);
-            m3.set_direction(HIGH);
-            m3.set_spin(SPEED_MAX);
-            m4.set_direction(HIGH);
-            m4.set_spin(SPEED_MAX);
-
-            Serial.println("Robot Rotate CCW");
-        }        
-        else
-        {
-            m1.set_spin(SPEED_MIN);
-            m2.set_spin(SPEED_MIN);
-            m3.set_spin(SPEED_MIN);
-            m4.set_spin(SPEED_MIN);
-            Serial.println("Robot STOP");
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(50));  // Small delay to avoid flooding UART
     }
 }
 #endif
+ 

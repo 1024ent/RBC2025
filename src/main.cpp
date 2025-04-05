@@ -10,6 +10,7 @@
 #include "output_config.h"  // Handles output configurations
 #include "thread_manager.h" // Manages task/thread execution
 
+// pio run -e master_mcu --target upload
 #ifdef MASTER
 // #include "master.h"  // Uncomment if additional master-specific code is needed
 
@@ -34,6 +35,7 @@ void loop() {
 }
 #endif
 
+// pio run -e slave_mcu --target upload
 #ifdef SLAVE
 // #include "slave.h"  // Uncomment if additional slave-specific code is needed
 

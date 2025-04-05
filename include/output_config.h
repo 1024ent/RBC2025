@@ -20,15 +20,6 @@
 #define     UART2_TX_PIN        GPIO_NUM_16
 #define     UART2_RX_PIN        GPIO_NUM_17
 
-#define PS4_MAC_ADDRESS "14:2b:2f:c0:28:fe"
-void master_init_output_instances();
-
-#endif
-
-#ifdef SLAVE
-/** THREAD INDICATOR **/
-#define     BLINK_GPIO1         GPIO_NUM_2
-
 /** ROBOT BASE OUTPUT PINS **/
 #define     MOTOR1_PWM          GPIO_NUM_25
 #define     MOTOR1_DIR          GPIO_NUM_26
@@ -42,9 +33,22 @@ void master_init_output_instances();
 #define     MOTOR4_PWM          GPIO_NUM_4
 #define     MOTOR4_DIR          GPIO_NUM_5
 
+#define     PS4_MAC_ADDRESS     "a8:42:e3:8f:fa:06"
+void master_init_output_instances();
+
+#endif
+
+#ifdef SLAVE
+/** THREAD INDICATOR **/
+#define     BLINK_GPIO1         GPIO_NUM_2
+
 /** MDD10A TEST **/
 #define     MOTOR5_PWM          GPIO_NUM_19
 #define     MOTOR5_DIR          GPIO_NUM_21
+
+/** TB6600 STEPPER MOTOR CONTROL PINS **/
+#define     STEPPER1_PUL        GPIO_NUM_12
+#define     STEPPER1_DIR        GPIO_NUM_13
 
 /** UART2 | Receiving: ESP32 MB **/
 #define UART2_TX_PIN GPIO_NUM_17  

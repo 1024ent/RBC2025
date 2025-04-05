@@ -8,8 +8,7 @@
  */
 
 #include <Arduino.h>
-#include <PS4Controller.h>
-
+#include "PS4Controller.h"
 class motor {
 private:
     int digital_pin;
