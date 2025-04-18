@@ -19,7 +19,8 @@ void dribbling_mechanism(void *parameter) {
     Stepper stepper(Stepper::DRIVER, STEPPER1_PUL, STEPPER1_DIR);
 
     const long runDuration = 5000;  // 5 seconds
-    bool hasRun = false;            // To prevent repeating unless button is pressed again
+    bool isRunning = false;
+    bool resetRequired = false;
 
     // Stepper motor settings
     stepper.setMaxSpeed(1000);      // max speed in steps/sec
@@ -28,8 +29,8 @@ void dribbling_mechanism(void *parameter) {
     for (;;) {
         int currentBtn = buttonValue;
 
-        if (currentBtn == 6 && !hasRun) {  // Triangle button pressed and not run yet
-            hasRun = true;
+        if (currentBtn == 6 && !isRunning && !resetRequired) {
+            isRunning = true;
 
             // Run CW for 5 seconds
             unsigned long startTime = millis();
@@ -49,16 +50,19 @@ void dribbling_mechanism(void *parameter) {
 
             // Stop the motor
             stepper.setSpeed(0);
+
+            // Require reset before next run
+            resetRequired = true;
+            isRunning = false;
         }
 
-        // Reset hasRun flag when button is released
-        if (currentBtn != 6) {
-            hasRun = false;
+        // Only button 9 (L1) can reset the mechanism
+        if (currentBtn == 9 && !isRunning) {
+            resetRequired = false;
         }
 
-        vTaskDelay(10);  // Small delay to let CPU breathe
+        vTaskDelay(10);  // CPU breathing room
     }
 }
 #endif
- 
  
