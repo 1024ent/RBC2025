@@ -58,5 +58,3 @@ void loop() {
     // Slave-specific loop code (if required in the future)
 }
 #endif
-
- 

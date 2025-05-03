@@ -10,7 +10,7 @@
 #define __INPUT_CONFIG_H__
 
 #ifdef MASTER
-#define PS4_MAC_ADDRESS "a8:42:e3:8f:fa:06"
+#define PS4_MAC_ADDRESS "14:2b:2f:c0:28:fe"
 void master_init_input_instances();
 #endif
 

@@ -13,10 +13,15 @@
 
 #ifdef MASTER 
 
-#define DEADZONE 15
-#define SPEED_MAX 255
-#define SPEED_MID 200
-#define SPEED_MIN 0
+#define DEADZONE   15
+#define MAX_SPEED  255
+#define MID_SPEED  200
+#define MIN_SPEED  0
+
+// Helper for deadzone
+int applyDeadzone(int val) {
+    return (abs(val) < DEADZONE) ? 0 : val;
+}
 
 void robot_movement_omni(void *parameter)
 {
@@ -31,136 +36,99 @@ void robot_movement_omni(void *parameter)
     {
         if (PS4.isConnected())
         {
-            int lx = PS4.LStickX();
-            int ly = PS4.LStickY();
-            int rx = PS4.RStickX();
+            int lx = applyDeadzone(PS4.LStickX());
+            int ly = applyDeadzone(PS4.LStickY());
+            int rx = applyDeadzone(PS4.RStickX());
 
-            // Apply deadzone
-            if (abs(lx) < DEADZONE) lx = 0;
-            if (abs(ly) < DEADZONE) ly = 0;
-            if (abs(rx) < DEADZONE) rx = 0;
-
-            // Forward
-            if ((ly > 0) && (lx < 29) && (lx > -29))
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Forward");
+            // Forward/Backward
+            if (ly > 0 && lx == 0) {
+                m1.move(LOW, ly);
+                m2.move(LOW, ly);
+                m3.move(LOW, ly);
+                m4.move(LOW, ly);
+                Serial.println("Forward");
             }
-
-            // Backward
-            else if ((ly < 0) && (lx < 29) && (lx > -29))
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Backward");
+            else if (ly < 0 && lx == 0) {
+                m1.move(HIGH, -ly);
+                m2.move(HIGH, -ly);
+                m3.move(HIGH, -ly);
+                m4.move(HIGH, -ly);
+                Serial.println("Backward");
             }
-
-            // Left
-            else if ((lx < 0) && (ly < 29) && (ly > -29))
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Left");
+            // Left/Right
+            else if (lx < 0 && ly == 0) {
+                m1.move(LOW, -lx);
+                m2.move(HIGH, -lx);
+                m3.move(LOW, -lx);
+                m4.move(HIGH, -lx);
+                Serial.println("Left");
             }
-
-            // Right
-            else if ((lx > 0) && (ly < 29) && (ly > -29))
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Right");
+            else if (lx > 0 && ly == 0) {
+                m1.move(HIGH, lx);
+                m2.move(LOW, lx);
+                m3.move(HIGH, lx);
+                m4.move(LOW, lx);
+                Serial.println("Right");
             }
-
-            // Diagonal Top Left
-            else if ((ly > 0) && (lx < -30))
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MIN);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MIN);
-
-                Serial.println("Robot Diagonal Top Left!\n");
+            // Diagonal directions
+            else if (lx < -30 && ly > 30) {
+                m1.set_spin(MIN_SPEED);
+                m2.move(LOW, MID_SPEED);
+                m3.set_spin(MIN_SPEED);
+                m4.move(LOW, MID_SPEED);
+                Serial.println("Top Left");
             }
-
-            // Diagonal Top Right
-            else if ((lx > 0) && (ly > 30))
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MIN);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MIN);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Diagonal Top Right!\n");
+            else if (lx > 30 && ly > 30) {
+                m1.move(LOW, MID_SPEED);
+                m2.set_spin(MIN_SPEED);
+                m3.move(LOW, MID_SPEED);
+                m4.set_spin(MIN_SPEED);
+                Serial.println("Top Right");
             }
-
-            // Diagonal Bottom Right
-            else if ((ly < 0) && (lx > 30))
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MIN);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MIN);
-
-                Serial.println("Robot Diagonal Bottom Right!\n");
+            else if (lx > 30 && ly < -30) {
+                m1.move(HIGH, MID_SPEED);
+                m2.set_spin(MIN_SPEED);
+                m3.move(HIGH, MID_SPEED);
+                m4.set_spin(MIN_SPEED);
+                Serial.println("Bottom Right");
             }
-
-            // Diagonal Bottom Left
-            else if ((lx < 0) && (ly < -30))
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MIN);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MIN);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Diagonal Bottom Left!\n");
+            else if (lx < -30 && ly < -30) {
+                m1.set_spin(MIN_SPEED);
+                m2.move(HIGH, MID_SPEED);
+                m3.set_spin(MIN_SPEED);
+                m4.move(HIGH, MID_SPEED);
+                Serial.println("Bottom Left");
             }
-
-            // Rotate CW
-            else if (rx > 45)
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Rotate CW");
+            // Rotation CW / CCW
+            else if (rx > 30) {
+                int speed = map(rx, 30, 128, MID_SPEED, MAX_SPEED);
+                m1.move(HIGH, speed);
+                m2.move(HIGH, speed);
+                m3.move(LOW, speed);
+                m4.move(LOW, speed);
+                Serial.println("Rotate CW");
             }
-
-            // Rotate CCW
-            else if (rx < -45)
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Rotate CCW");
+            else if (rx < -30) {
+                int speed = map(rx, -128, -30, MAX_SPEED, MID_SPEED);
+                m1.move(LOW, speed);
+                m2.move(LOW, speed);
+                m3.move(HIGH, speed);
+                m4.move(HIGH, speed);
+                Serial.println("Rotate CCW");
             }
-
-            // Stop if everything is within deadzone
-            else
-            {
-                m1.set_spin(SPEED_MIN);
-                m2.set_spin(SPEED_MIN);
-                m3.set_spin(SPEED_MIN);
-                m4.set_spin(SPEED_MIN);
-                //Serial.println("Robot STOP");
+            else {
+                // STOP all
+                m1.set_spin(MIN_SPEED);
+                m2.set_spin(MIN_SPEED);
+                m3.set_spin(MIN_SPEED);
+                m4.set_spin(MIN_SPEED);
+                //Serial.println("Stop");
             }
         }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
+
 #endif
  

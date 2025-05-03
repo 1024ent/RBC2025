@@ -5,7 +5,11 @@
  * @license Apache-2.0
  * @author Nazwa Najmuddin [ELPROG]
  * @author Kishan Kumar [ELPROG]
+ * @author Loo Hui Kie [ELPROG]
  */
+
+#ifndef __ROBOTMOVEMENT_H__
+#define __ROBOTMOVEMENT_H__
 
 #include <Arduino.h>
 #include "PS4Controller.h"
@@ -16,8 +20,8 @@ private:
     int channel_num;
     int direction;
     int pwm_val;
-    float pwm_val_smooth;
-    float pwm_val_prev;
+    float pwm_val_smooth = 0;
+    float pwm_val_prev = 0;
 
 public:
     void init_data(int dig, int ana, int channel)
@@ -27,45 +31,29 @@ public:
         channel_num = channel;
 
         pinMode(digital_pin, OUTPUT);
-
         ledcAttachPin(analog_pin, channel_num);
-        ledcSetup(channel_num, 20000, 8);
+        ledcSetup(channel_num, 20000, 8); // 20 kHz, 8-bit PWM
     }
 
-    float speed_control()
-    {
-        pwm_val_smooth = (pwm_val * 0.06) + (pwm_val_prev * 0.94);
-        pwm_val_prev = pwm_val_smooth;
-        return (pwm_val_smooth);
+    void set_direction(int dir) {
+        direction = dir;
+        digitalWrite(digital_pin, dir);
     }
 
     void set_spin(int pwm)
     {
-        unsigned long time_now = millis();
-        int delay_period = 5;
-        pwm_val = pwm;
-        float new_pwm = speed_control();
-        //Serial.println(new_pwm);
-        digitalWrite(digital_pin, direction);
-        ledcWrite(channel_num, new_pwm);
-        while (millis() < time_now + delay_period)
-        {
-        }
+        pwm_val = constrain(pwm, 0, 255);
+        pwm_val_smooth = pwm_val * 0.1f + pwm_val_prev * 0.9f;
+        pwm_val_prev = pwm_val_smooth;
+        ledcWrite(channel_num, pwm_val_smooth);
     }
 
-    void set_direction(int dir)
-    {
-        direction = dir;
-    }
-
-    void man_move(int dir, int speed)
-    {
-
-        direction = dir;
-        digitalWrite(digital_pin, direction);
-        ledcWrite(channel_num, speed);
-        //Serial.println(speed);
+    void move(int dir, int pwm) {
+        set_direction(dir);
+        set_spin(pwm);
     }
 };
 
 void robot_movement_omni(void *parameter);
+
+#endif
