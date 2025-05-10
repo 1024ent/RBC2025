@@ -10,13 +10,19 @@
 
 #include "robot_movement.h"
 #include "output_config.h"
+#include <math.h>
 
-#ifdef MASTER 
+#ifdef MASTER
 
-#define DEADZONE 15
-#define SPEED_MAX 255
-#define SPEED_MID 200
-#define SPEED_MIN 0
+#define DEADZONE   15
+#define MAX_SPEED  255
+#define MID_SPEED  127
+#define LOW_SPEED  63
+#define MIN_SPEED  0
+
+int applyDeadzone(int val) {
+    return (abs(val) < DEADZONE) ? 0 : val;
+}
 
 void robot_movement_omni(void *parameter)
 {
@@ -31,136 +37,114 @@ void robot_movement_omni(void *parameter)
     {
         if (PS4.isConnected())
         {
-            int lx = PS4.LStickX();
-            int ly = PS4.LStickY();
-            int rx = PS4.RStickX();
+            int lx = applyDeadzone(PS4.LStickX());
+            int ly = applyDeadzone(PS4.LStickY());
+            int rx = applyDeadzone(PS4.RStickX());
 
-            // Apply deadzone
-            if (abs(lx) < DEADZONE) lx = 0;
-            if (abs(ly) < DEADZONE) ly = 0;
-            if (abs(rx) < DEADZONE) rx = 0;
+            if (lx != 0 || ly != 0) {
+                float angle = atan2(ly, lx) * 180.0 / PI; // convert to degrees
 
-            // Forward
-            if ((ly > 0) && (lx < 29) && (lx > -29))
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
+                // Normalize angle to -180 to +180
+                if (angle > 180) angle -= 360;
+                if (angle < -180) angle += 360;
 
-                Serial.println("Robot Forward");
+                int speed = map(sqrt(lx*lx + ly*ly), 0, 127 * 1.41, MIN_SPEED, MAX_SPEED);
+                // Clamp speed to avoid out of bound
+                speed = constrain(speed, MIN_SPEED, MAX_SPEED);
+
+                if (angle > -22.5 && angle <= 22.5) {
+                    // Right
+                    m1.move(HIGH, speed);
+                    m2.move(LOW, speed);
+                    m3.move(HIGH, speed);
+                    m4.move(LOW, speed);
+                    Serial.println("Right");
+                }
+                else if (angle > 22.5 && angle <= 67.5) {
+                    // Top-Right
+                    m1.move(LOW, speed);
+                    m2.set_spin(MIN_SPEED);
+                    m3.move(LOW, speed);
+                    m4.set_spin(MIN_SPEED);
+                    Serial.println("Top-Right");
+                }
+                else if (angle > 67.5 && angle <= 112.5) {
+                    // Forward
+                    m1.move(LOW, speed);
+                    m2.move(LOW, speed);
+                    m3.move(LOW, speed);
+                    m4.move(LOW, speed);
+                    Serial.println("Forward");
+                }
+                else if (angle > 112.5 && angle <= 157.5) {
+                    // Top-Left
+                    m1.set_spin(MIN_SPEED);
+                    m2.move(LOW, speed);
+                    m3.set_spin(MIN_SPEED);
+                    m4.move(LOW, speed);
+                    Serial.println("Top-Left");
+                }
+                else if (angle > 157.5 || angle <= -157.5) {
+                    // Left
+                    m1.move(LOW, speed);
+                    m2.move(HIGH, speed);
+                    m3.move(LOW, speed);
+                    m4.move(HIGH, speed);
+                    Serial.println("Left");
+                }
+                else if (angle > -157.5 && angle <= -112.5) {
+                    // Bottom-Left
+                    m1.set_spin(MIN_SPEED);
+                    m2.move(HIGH, speed);
+                    m3.set_spin(MIN_SPEED);
+                    m4.move(HIGH, speed);
+                    Serial.println("Bottom-Left");
+                }
+                else if (angle > -112.5 && angle <= -67.5) {
+                    // Backward
+                    m1.move(HIGH, speed);
+                    m2.move(HIGH, speed);
+                    m3.move(HIGH, speed);
+                    m4.move(HIGH, speed);
+                    Serial.println("Backward");
+                }
+                else if (angle > -67.5 && angle <= -22.5) {
+                    // Bottom-Right
+                    m1.move(HIGH, speed);
+                    m2.set_spin(MIN_SPEED);
+                    m3.move(HIGH, speed);
+                    m4.set_spin(MIN_SPEED);
+                    Serial.println("Bottom-Right");
+                }
             }
-
-            // Backward
-            else if ((ly < 0) && (lx < 29) && (lx > -29))
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Backward");
+            // Rotation only if no directional movement
+            else if (rx > 30) {
+                int speed = map(rx, 30, 127, MID_SPEED, MAX_SPEED);
+                m1.move(HIGH, speed);
+                m2.move(HIGH, speed);
+                m3.move(LOW, speed);
+                m4.move(LOW, speed);
+                Serial.println("Rotate CW");
             }
-
-            // Left
-            else if ((lx < 0) && (ly < 29) && (ly > -29))
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Left");
+            else if (rx < -30) {
+                int speed = map(rx, -127, -30, MAX_SPEED, MID_SPEED);
+                m1.move(LOW, speed);
+                m2.move(LOW, speed);
+                m3.move(HIGH, speed);
+                m4.move(HIGH, speed);
+                Serial.println("Rotate CCW");
             }
-
-            // Right
-            else if ((lx > 0) && (ly < 29) && (ly > -29))
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Right");
-            }
-
-            // Diagonal Top Left
-            else if ((ly > 0) && (lx < -30))
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MIN);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MIN);
-
-                Serial.println("Robot Diagonal Top Left!\n");
-            }
-
-            // Diagonal Top Right
-            else if ((lx > 0) && (ly > 30))
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MIN);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MIN);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Diagonal Top Right!\n");
-            }
-
-            // Diagonal Bottom Right
-            else if ((ly < 0) && (lx > 30))
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MIN);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MIN);
-
-                Serial.println("Robot Diagonal Bottom Right!\n");
-            }
-
-            // Diagonal Bottom Left
-            else if ((lx < 0) && (ly < -30))
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MIN);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MIN);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Diagonal Bottom Left!\n");
-            }
-
-            // Rotate CW
-            else if (rx > 45)
-            {
-                m1.set_direction(LOW);  m1.set_spin(SPEED_MAX);
-                m2.set_direction(LOW);  m2.set_spin(SPEED_MAX);
-                m3.set_direction(LOW);  m3.set_spin(SPEED_MAX);
-                m4.set_direction(LOW);  m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Rotate CW");
-            }
-
-            // Rotate CCW
-            else if (rx < -45)
-            {
-                m1.set_direction(HIGH); m1.set_spin(SPEED_MAX);
-                m2.set_direction(HIGH); m2.set_spin(SPEED_MAX);
-                m3.set_direction(HIGH); m3.set_spin(SPEED_MAX);
-                m4.set_direction(HIGH); m4.set_spin(SPEED_MAX);
-
-                Serial.println("Robot Rotate CCW");
-            }
-
-            // Stop if everything is within deadzone
-            else
-            {
-                m1.set_spin(SPEED_MIN);
-                m2.set_spin(SPEED_MIN);
-                m3.set_spin(SPEED_MIN);
-                m4.set_spin(SPEED_MIN);
-                //Serial.println("Robot STOP");
+            else {
+                m1.set_spin(MIN_SPEED);
+                m2.set_spin(MIN_SPEED);
+                m3.set_spin(MIN_SPEED);
+                m4.set_spin(MIN_SPEED);
             }
         }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
+
 #endif
  
