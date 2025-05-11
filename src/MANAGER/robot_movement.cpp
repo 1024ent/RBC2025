@@ -6,6 +6,7 @@
  * @author Nazwa Najmuddin [ELPROG]
  * @author Kishan Kumar [ELPROG]
  * @author Loo Hui Kie [ELPROG]
+ * @author Lee Wen Hui [ELPROG]
  */
 
 #include "robot_movement.h"
