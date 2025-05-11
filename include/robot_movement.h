@@ -55,5 +55,6 @@ public:
 };
 
 void robot_movement_omni(void *parameter);
+void robot_movement_omni_v2(void *parameter);
 
 #endif

@@ -85,7 +85,7 @@ void master_thread_manager()
                             0); 
 
     // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
-    xTaskCreatePinnedToCore(robot_movement_omni, 
+    xTaskCreatePinnedToCore(robot_movement_omni_v2, 
                             "Connecting to base ...", 
                             75000, 
                             NULL, 
