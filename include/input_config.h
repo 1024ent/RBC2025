@@ -21,14 +21,14 @@ void master_init_input_instances();
 #ifdef SLAVE
 /** DRIBBLING MECHANISM **/
 // BALL PICKING MECHANISM
-#define     LIM_Z1   GPIO_NUM_34
-#define     LIM_Z2   GPIO_NUM_35
-#define     LIM_Y1   GPIO_NUM_36
-#define     LIM_Y2   GPIO_NUM_39
+#define     LIM_Z1   GPIO_NUM_15
+#define     LIM_Z2   GPIO_NUM_4
+#define     LIM_Y1   GPIO_NUM_33
+#define     LIM_Y2   GPIO_NUM_21
 
 
 void slave_init_input_instances();
 
 #endif
 
-#endif // __INPUT_CONFIG_H__
+#endif 

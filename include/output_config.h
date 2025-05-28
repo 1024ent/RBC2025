@@ -46,7 +46,7 @@ void master_init_output_instances();
 #define     SHOOT_DIR_L         GPIO_NUM_13
 #define     SHOOT_PWM_R         GPIO_NUM_26 
 #define     SHOOT_DIR_R         GPIO_NUM_19 
-#define     SHOOT_RELAY         GPIO_NUM_5
+#define     SHOOT_RELAY         GPIO_NUM_5  // Check Pin
 
 /** DRIBBLING MECHANISM **/
 // BALL PICKING MECHANISM

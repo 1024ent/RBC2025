@@ -14,7 +14,6 @@
 #include "uart_manager.h"
 
 #ifdef MASTER
-#include "master.h"
 #include "robot_movement.h"
 #include "controller_manager.h"
 /** 
@@ -96,7 +95,6 @@ void master_thread_manager()
 #endif
 
 #ifdef SLAVE
-#include "slave.h"
 #include "dribbling.h"
 #include "shooting.h"
 TaskHandle_t myUART = NULL;
@@ -133,17 +131,6 @@ void slave_thread_manager() {
                             5, 
                             &myUART, 
                             0);
-                            
-    // Task for DRIBBLING MECHANISM status (Runs on Core 0 with low priority)
-    /*
-    xTaskCreatePinnedToCore(dribbling_mechanism, 
-                            "Running Dribbling Mechanism ...", 
-                            10000, 
-                            NULL, 
-                            3, 
-                            NULL, 
-                            1);     
-    */
 
     // Task for SHOOTING MECHANISM status (Runs on Core 0 with low priority)
     xTaskCreatePinnedToCore(shooting_mechanism, 
@@ -153,5 +140,16 @@ void slave_thread_manager() {
                             3, 
                             NULL, 
                             1);
+                            
+    // Task for DRIBBLING MECHANISM status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(dribbling_mechanism, 
+                            "Running Dribbling Mechanism ...", 
+                            10000, 
+                            NULL, 
+                            3, 
+                            NULL, 
+                            1); 
+
+    
 }
 #endif

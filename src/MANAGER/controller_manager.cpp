@@ -82,5 +82,3 @@ void controller_led_sequence(void *pvParameters) {
     }
 }
 #endif
- 
-
