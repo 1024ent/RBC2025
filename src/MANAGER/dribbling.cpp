@@ -60,11 +60,16 @@ void dribbling_mechanism(void *parameter) {
 
 void lifting_mechanism(void *parameter) {
     extern int buttonValue;  // Shared variable updated by UART receive function
+    bool isRunning = false;
+    bool resetRequired = false;
 
     pinMode(LIM_Z1, INPUT_PULLUP);
     pinMode(LIM_Z2, INPUT_PULLUP);
     pinMode(LIM_Y1, INPUT_PULLUP);
     pinMode(LIM_Y2, INPUT_PULLUP);
+
+    MD motor_z(PWM_DIR,PICK_PWM_Z,PICK_DIR_Z);
+    MD motor_y(PWM_DIR,PICK_PWM_Y,PICK_DIR_Y);
 
     for (;;) {
         int currentBtn = buttonValue;
