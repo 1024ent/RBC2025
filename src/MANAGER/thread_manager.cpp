@@ -98,6 +98,7 @@ void master_thread_manager()
 #ifdef SLAVE
 #include "slave.h"
 #include "dribbling.h"
+#include "shooting.h"
 TaskHandle_t myUART = NULL;
 
 void slave_thread_manager() {
@@ -133,13 +134,24 @@ void slave_thread_manager() {
                             &myUART, 
                             0);
                             
-    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
+    // Task for DRIBBLING MECHANISM status (Runs on Core 0 with low priority)
+    /*
     xTaskCreatePinnedToCore(dribbling_mechanism, 
                             "Running Dribbling Mechanism ...", 
                             10000, 
                             NULL, 
                             3, 
                             NULL, 
-                            1); 
+                            1);     
+    */
+
+    // Task for SHOOTING MECHANISM status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(shooting_mechanism, 
+                            "Running Shooting Mechanism ...", 
+                            10000, 
+                            NULL, 
+                            3, 
+                            NULL, 
+                            1);
 }
 #endif

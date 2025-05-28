@@ -10,12 +10,25 @@
 #define __INPUT_CONFIG_H__
 
 #ifdef MASTER
-#define PS4_MAC_ADDRESS "14:2b:2f:c0:28:fe"
+
+#define PS4_MAC_ADDRESS "d8:bc:38:fc:9f:ba"
+// 14:2b:2f:c0:28:fe
+
 void master_init_input_instances();
+
 #endif
 
 #ifdef SLAVE
+/** DRIBBLING MECHANISM **/
+// BALL PICKING MECHANISM
+#define     LIM_Z1   GPIO_NUM_34
+#define     LIM_Z2   GPIO_NUM_35
+#define     LIM_Y1   GPIO_NUM_36
+#define     LIM_Y2   GPIO_NUM_39
+
+
 void slave_init_input_instances();
+
 #endif
 
 #endif // __INPUT_CONFIG_H__

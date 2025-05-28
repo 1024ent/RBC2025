@@ -1,0 +1,131 @@
+#include <PS4Controller.h>
+#include <Arduino.h>
+
+// Motor control pins for LEFT motor (motor 1) and RIGHT motor (motor 2)
+#define PWM_LEFT 12    // PWM pin for left motor (GPIO 13)
+#define DIR_LEFT 13    // Direction pin for left motor (GPIO 15)
+#define PWM_RIGHT 26   // PWM pin for right motor (GPIO 20)
+#define DIR_RIGHT 19   // Direction pin for right motor (GPIO 26)
+
+// GPIOs for relay and LED indicator
+#define RELAY_PIN 5            // Relay control pin
+#define LED_INDICATOR_PIN 2    // LED pin for indicator
+
+// Motor speed values (keep them as per your original code)
+#define MOTOR_STOP 0
+#define MOTOR_SLOW_1 127.5
+#define MOTOR_SLOW_2 125
+#define MOTOR_FAST_1 255
+#define MOTOR_FAST_2 250
+
+// PWM setup for ESP32
+void setupPWM() {
+  // Set PWM frequency (5000Hz, commonly used for motor control)
+  ledcSetup(0, 5000, 8);  // Channel 0 for Left Motor PWM
+  ledcSetup(1, 5000, 8);  // Channel 1 for Right Motor PWM
+  
+  // Attach PWM pins to the channels
+  ledcAttachPin(PWM_LEFT, 0);   // Left motor PWM
+  ledcAttachPin(PWM_RIGHT, 1);  // Right motor PWM
+
+  // Set initial motor speed to stop
+  ledcWrite(0, MOTOR_STOP);
+  ledcWrite(1, MOTOR_STOP);
+}
+
+void startShootingSequence() {
+  Serial.println(">>> Circle button pressed → Starting shooting sequence");
+
+  // Turn on LED indicator
+  digitalWrite(LED_INDICATOR_PIN, HIGH);
+  delay(500);  // Wait before shooting
+
+  // --- 50% speed ---
+  Serial.println("Setting motors to 50% speed...");
+  ledcWrite(0, MOTOR_SLOW_2);
+  ledcWrite(1, MOTOR_SLOW_1);
+  digitalWrite(DIR_LEFT, LOW);  // Motor 1 forward
+  digitalWrite(DIR_RIGHT, HIGH); // Motor 2 forward
+  delay(1500);
+
+  // --- 100% speed ---
+  Serial.println("Setting motors to 100% speed and activating relay...");
+  ledcWrite(0, MOTOR_FAST_2);
+  ledcWrite(1, MOTOR_FAST_1);
+  digitalWrite(DIR_LEFT, LOW);  // Motor 1 forward
+  digitalWrite(DIR_RIGHT, HIGH); // Motor 2 forward
+  delay(500);
+  digitalWrite(RELAY_PIN, LOW);
+  delay(800);
+  digitalWrite(RELAY_PIN, HIGH);
+
+
+  // --- Relay active duration ---
+  delay(3000);
+  digitalWrite(RELAY_PIN, HIGH);
+  Serial.println("Relay deactivated.");
+
+  // --- Slow down motors ---
+  Serial.println("Slowing down motors...");
+  ledcWrite(0, MOTOR_SLOW_2);
+  ledcWrite(1, MOTOR_SLOW_1);
+  digitalWrite(DIR_LEFT, LOW);  // Motor 1 forward
+  digitalWrite(DIR_RIGHT, HIGH); // Motor 2 forward
+  delay(1500);
+
+  ledcWrite(0, MOTOR_STOP);
+  ledcWrite(1, MOTOR_STOP);
+  Serial.println("Stopping motors and turning off LED.");
+  digitalWrite(LED_INDICATOR_PIN, LOW);
+
+  delay(3000);
+}
+
+// PS4 Controller task
+void ps4Task(void *pvParameters) {
+  while (1) {
+    if (PS4.isConnected()) {
+      // Square button turns on LED (indicator only)
+      if (PS4.Square()) {
+        Serial.println("Square button pressed → LED ON");
+        digitalWrite(LED_INDICATOR_PIN, HIGH);
+        delay(2000);
+        digitalWrite(LED_INDICATOR_PIN, LOW);
+      }
+
+      // Circle button triggers shooting sequence
+      if (PS4.Circle()) {
+        startShootingSequence();
+
+        // Wait for button release to prevent retrigger
+        while (PS4.Circle()) {
+          delay(10);
+        }
+      }
+    }
+    vTaskDelay(pdMS_TO_TICKS(50));  // Prevents task from blocking other tasks
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  const char* ps4_mac_address = "d8:bc:38:fc:9f:ba"; //d8:bc:38:fc:9f:ba
+  PS4.begin(ps4_mac_address);
+  Serial.println("Waiting for PS4 controller to connect...");
+
+  pinMode(RELAY_PIN, OUTPUT);
+  digitalWrite(RELAY_PIN, HIGH);
+
+  pinMode(LED_INDICATOR_PIN, OUTPUT);
+  digitalWrite(LED_INDICATOR_PIN, LOW);
+
+  setupPWM();
+
+  // Create RTOS task for PS4 controller
+  xTaskCreatePinnedToCore(ps4Task, "PS4 Controller Task", 4096, NULL, 1, NULL, 1);
+}
+
+void loop() {
+  // RTOS will handle tasks; nothing needs to be done here
+}
