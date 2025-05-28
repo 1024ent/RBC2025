@@ -14,7 +14,6 @@
 #include "uart_manager.h"
 
 #ifdef MASTER
-#include "master.h"
 #include "robot_movement.h"
 #include "controller_manager.h"
 /** 
@@ -85,7 +84,7 @@ void master_thread_manager()
                             0); 
 
     // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
-    xTaskCreatePinnedToCore(robot_movement_omni, 
+    xTaskCreatePinnedToCore(robot_movement_omni_v2, 
                             "Connecting to base ...", 
                             75000, 
                             NULL, 
@@ -96,8 +95,8 @@ void master_thread_manager()
 #endif
 
 #ifdef SLAVE
-#include "slave.h"
 #include "dribbling.h"
+#include "shooting.h"
 TaskHandle_t myUART = NULL;
 
 void slave_thread_manager() {
@@ -132,8 +131,17 @@ void slave_thread_manager() {
                             5, 
                             &myUART, 
                             0);
+
+    // Task for SHOOTING MECHANISM status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(shooting_mechanism, 
+                            "Running Shooting Mechanism ...", 
+                            10000, 
+                            NULL, 
+                            3, 
+                            NULL, 
+                            1);
                             
-    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
+    // Task for DRIBBLING MECHANISM status (Runs on Core 0 with low priority)
     xTaskCreatePinnedToCore(dribbling_mechanism, 
                             "Running Dribbling Mechanism ...", 
                             10000, 
@@ -141,5 +149,7 @@ void slave_thread_manager() {
                             3, 
                             NULL, 
                             1); 
+
+    
 }
 #endif

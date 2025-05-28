@@ -18,5 +18,4 @@ void master_thread_manager();
 void slave_thread_manager();
 #endif
 
-
 #endif
