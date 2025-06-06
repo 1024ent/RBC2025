@@ -123,7 +123,7 @@ void slave_thread_manager() {
                             NULL, 
                             0);
 
-    // Task for blinking an LED to indicate system status (Runs on Core 0 with low priority)
+    // Task for receiving and parsing UART data (Runs on Core 0 with high priority)
     xTaskCreatePinnedToCore(uart_receive_task, 
                             "Receiving UART TASK ...", 
                             10000, 
@@ -135,7 +135,7 @@ void slave_thread_manager() {
     // Task for SHOOTING MECHANISM status (Runs on Core 0 with low priority)
     xTaskCreatePinnedToCore(shooting_mechanism, 
                             "Running Shooting Mechanism ...", 
-                            10000, 
+                            4096, 
                             NULL, 
                             3, 
                             NULL, 
@@ -144,12 +144,46 @@ void slave_thread_manager() {
     // Task for DRIBBLING MECHANISM status (Runs on Core 0 with low priority)
     xTaskCreatePinnedToCore(dribbling_mechanism, 
                             "Running Dribbling Mechanism ...", 
-                            10000, 
+                            4096, 
                             NULL, 
                             3, 
                             NULL, 
                             1); 
 
+    // Task for LIFTING MECHANISM status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(lifting_mechanism, 
+                            "Running Lifting Mechanism ...", 
+                            4096, 
+                            NULL, 
+                            3, 
+                            NULL, 
+                            1);
+
+    // Task for LOWERING MECHANISM status (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(lowering_mechanism, 
+                            "Running Lowering Mechanism ...", 
+                            4096, 
+                            NULL, 
+                            3, 
+                            NULL, 
+                            1);     
     
+    // Task for Yaw Forward Mechanism (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(yaw_forward_mechanism,      
+                            "Running Yaw Forward Mechanism ...", 
+                            4096, 
+                            NULL, 
+                            3, 
+                            NULL, 
+                            1); 
+    
+    // Task for Yaw Backward Mechanism (Runs on Core 0 with low priority)
+    xTaskCreatePinnedToCore(yaw_backward_mechanism,      
+                            "Running Yaw Backward Mechanism ...", 
+                            4096, 
+                            NULL, 
+                            3, 
+                            NULL, 
+                            1); 
 }
 #endif

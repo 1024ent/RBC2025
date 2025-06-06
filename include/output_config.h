@@ -50,10 +50,10 @@ void master_init_output_instances();
 
 /** DRIBBLING MECHANISM **/
 // BALL PICKING MECHANISM
-#define     PICK_PWM_Z         GPIO_NUM_18
-#define     PICK_DIR_Z         GPIO_NUM_25
-#define     PICK_PWM_Y         GPIO_NUM_14
-#define     PICK_DIR_Y         GPIO_NUM_27
+#define     PWM_Z         GPIO_NUM_18
+#define     DIR_Z         GPIO_NUM_25
+#define     PWM_Y         GPIO_NUM_14
+#define     DIR_Y         GPIO_NUM_27
 
 // BALL DRIBBLING MECHANISM
 #define     RELAY1_PIN          GPIO_NUM_26  // GPIO 26 connected to Relay 1
