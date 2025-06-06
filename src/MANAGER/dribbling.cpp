@@ -15,17 +15,17 @@
 #include "motor_driver.h"
 
 #ifdef SLAVE
+MD motorZ(PWM_DIR,PWM_Z,DIR_Z);
+MD motorY(PWM_DIR,PWM_Y,DIR_Y);
+
 void dribbling_mechanism(void *parameter) {
     extern int buttonValue;  // Shared variable updated by UART receive function
     bool isRunning = false;
     bool resetRequired = false;
 
-    pinMode(RELAY1_PIN, OUTPUT);        // Relay 1 control pin
-    pinMode(RELAY2_PIN, OUTPUT);        // Relay 2 control pin
-
     digitalWrite(RELAY1_PIN,LOW);     // Both OFF initially (active LOW)
-    digitalWrite(RELAY2_PIN, LOW);
-    
+    digitalWrite(RELAY2_PIN, LOW); 
+
     for (;;) {
         int currentBtn = buttonValue;
 
@@ -60,47 +60,258 @@ void dribbling_mechanism(void *parameter) {
 
 void lifting_mechanism(void *parameter) {
     extern int buttonValue;  // Shared variable updated by UART receive function
-    bool isRunning = false;
-    bool resetRequired = false;
 
-    pinMode(LIM_Z1, INPUT_PULLUP);
-    pinMode(LIM_Z2, INPUT_PULLUP);
-    pinMode(LIM_Y1, INPUT_PULLUP);
-    pinMode(LIM_Y2, INPUT_PULLUP);
+    enum class MotorState {
+        IDLE,
+        MOVING_UP,
+        REVERSING,
+        STOPPED,
+        WAITING_FOR_RELEASE
+    };
 
-    MD motor_z(PWM_DIR,PICK_PWM_Z,PICK_DIR_Z);
-    MD motor_y(PWM_DIR,PICK_PWM_Y,PICK_DIR_Y);
+    MotorState state = MotorState::IDLE;
+    const int upSpeed = 150;
+    const int reverseSpeed = -64;
+    const unsigned long reverseDuration = 300; // ms
+    bool buttonWasPressed = false;
 
     for (;;) {
         int currentBtn = buttonValue;
+        bool buttonIsPressed = (currentBtn == 3); // Button 3 is UP
 
-        if (currentBtn == 6 && !isRunning && !resetRequired) {
+        switch(state) {
+            case MotorState::IDLE:
+                if(buttonIsPressed && !buttonWasPressed) {
+                    // Start movement on button press (edge detection)
+                    motorZ.setSpeed(upSpeed);
+                    state = MotorState::MOVING_UP;
+                }
+                break;
 
+            case MotorState::MOVING_UP:
+                if(digitalRead(LIM_Z1) == LOW) {
+                    // Limit switch triggered
+                    motorZ.setSpeed(reverseSpeed);
+                    state = MotorState::REVERSING;
+                } else if (!buttonIsPressed) {
+                    // Emergency stop if button released during movement
+                    motorZ.setSpeed(0);
+                    state = MotorState::IDLE;
+                }
+                break;
+
+            case MotorState::REVERSING:
+                vTaskDelay(pdMS_TO_TICKS(reverseDuration));
+                motorZ.setSpeed(0);
+                state = MotorState::STOPPED;
+                break;
+
+            case MotorState::STOPPED:
+                state = MotorState::WAITING_FOR_RELEASE;
+                break;
+
+            case MotorState::WAITING_FOR_RELEASE:
+                if(!buttonIsPressed) {
+                    state = MotorState::IDLE; // Reset only when button is released
+                }
+                break;
         }
 
-        // Only button 9 (L1) can reset the mechanism
-        if (currentBtn == 9 && !isRunning) {
-            resetRequired = false;
-        }
-
-        vTaskDelay(10);  // CPU breathing room
+        buttonWasPressed = buttonIsPressed; // Track previous button state
+        vTaskDelay(pdMS_TO_TICKS(10));  // Use proper FreeRTOS macro
     }   
 }
 
 void lowering_mechanism(void *parameter) {
+    extern int buttonValue;  // Shared variable updated by UART receive function
 
+    enum class MotorState {
+        IDLE,
+        MOVING_DOWN,
+        REVERSING,
+        STOPPED,
+        WAITING_FOR_RELEASE
+    };
+
+    MotorState state = MotorState::IDLE;
+    const int downSpeed = -150;
+    const int reverseSpeed = 64;
+    const unsigned long reverseDuration = 300; // ms
+    bool buttonWasPressed = false;
+
+    for (;;) {
+        int currentBtn = buttonValue;
+        bool buttonIsPressed = (currentBtn == 2); // Button 2 is DOWN
+
+        switch(state) {
+            case MotorState::IDLE:
+                if(buttonIsPressed && !buttonWasPressed) {
+                    // Start movement on button press (edge detection)
+                    motorZ.setSpeed(downSpeed);
+                    state = MotorState::MOVING_DOWN;
+                }
+                break;
+
+            case MotorState::MOVING_DOWN:
+                if(digitalRead(LIM_Z2) == LOW) {
+                    // Limit switch triggered
+                    motorZ.setSpeed(reverseSpeed);
+                    state = MotorState::REVERSING;
+                } else if (!buttonIsPressed) {
+                    // Emergency stop if button released during movement
+                    motorZ.setSpeed(0);
+                    state = MotorState::IDLE;
+                }
+                break;
+
+            case MotorState::REVERSING:
+                vTaskDelay(pdMS_TO_TICKS(reverseDuration));
+                motorZ.setSpeed(0);
+                state = MotorState::STOPPED;
+                break;
+
+            case MotorState::STOPPED:
+                state = MotorState::WAITING_FOR_RELEASE;
+                break;
+
+            case MotorState::WAITING_FOR_RELEASE:
+                if(!buttonIsPressed) {
+                    state = MotorState::IDLE; // Reset only when button is released
+                }
+                break;
+        }
+
+        buttonWasPressed = buttonIsPressed; // Track previous button state
+        vTaskDelay(pdMS_TO_TICKS(10));  // Use proper FreeRTOS macro
+    }   
 }
 
 void yaw_forward_mechanism(void *parameter) {
+    extern int buttonValue;  // Shared variable updated by UART receive function
 
+    enum class MotorState {
+        IDLE,
+        MOVING_FRONT,
+        REVERSING,
+        STOPPED,
+        WAITING_FOR_RELEASE
+    };
+
+    MotorState state = MotorState::IDLE;
+    const int frontSpeed = -150;
+    const int reverseSpeed = 64;
+    const unsigned long reverseDuration = 300; // ms
+    bool buttonWasPressed = false;
+
+    for (;;) {
+        int currentBtn = buttonValue;
+        bool buttonIsPressed = (currentBtn == 1); // Button 1 is RIGHT
+
+        switch(state) {
+            case MotorState::IDLE:
+                if(buttonIsPressed && !buttonWasPressed) {
+                    // Start movement on button press (edge detection)
+                    motorY.setSpeed(frontSpeed);
+                    state = MotorState::MOVING_FRONT;
+                }
+                break;
+
+            case MotorState::MOVING_FRONT:
+                if(digitalRead(LIM_Y1) == LOW) {
+                    // Limit switch triggered
+                    motorY.setSpeed(reverseSpeed);
+                    state = MotorState::REVERSING;
+                } else if (!buttonIsPressed) {
+                    // Emergency stop if button released during movement
+                    motorY.setSpeed(0);
+                    state = MotorState::IDLE;
+                }
+                break;
+
+            case MotorState::REVERSING:
+                vTaskDelay(pdMS_TO_TICKS(reverseDuration));
+                motorY.setSpeed(0);
+                state = MotorState::STOPPED;
+                break;
+
+            case MotorState::STOPPED:
+                state = MotorState::WAITING_FOR_RELEASE;
+                break;
+
+            case MotorState::WAITING_FOR_RELEASE:
+                if(!buttonIsPressed) {
+                    state = MotorState::IDLE; // Reset only when button is released
+                }
+                break;
+        }
+
+        buttonWasPressed = buttonIsPressed; // Track previous button state
+        vTaskDelay(pdMS_TO_TICKS(10));  // Use proper FreeRTOS macro
+    } 
 }
 
 void yaw_backward_mechanism(void *parameter) {
+    extern int buttonValue;  // Shared variable updated by UART receive function
 
-}
+    enum class MotorState {
+        IDLE,
+        MOVING_BACK,
+        REVERSING,
+        STOPPED,
+        WAITING_FOR_RELEASE
+    };
 
-void ball_picking_mechanism(void *parameter){
-    
+    MotorState state = MotorState::IDLE;
+    const int backSpeed = 150;
+    const int reverseSpeed = -64;
+    const unsigned long reverseDuration = 300; // ms
+    bool buttonWasPressed = false;
+
+    for (;;) {
+        int currentBtn = buttonValue;
+        bool buttonIsPressed = (currentBtn == 4); // Button 4 is LEFT
+
+        switch(state) {
+            case MotorState::IDLE:
+                if(buttonIsPressed && !buttonWasPressed) {
+                    // Start movement on button press (edge detection)
+                    motorY.setSpeed(backSpeed);
+                    state = MotorState::MOVING_BACK;
+                }
+                break;
+
+            case MotorState::MOVING_BACK:
+                if(digitalRead(LIM_Y2) == LOW) {
+                    // Limit switch triggered
+                    motorY.setSpeed(reverseSpeed);
+                    state = MotorState::REVERSING;
+                } else if (!buttonIsPressed) {
+                    // Emergency stop if button released during movement
+                    motorY.setSpeed(0);
+                    state = MotorState::IDLE;
+                }
+                break;
+
+            case MotorState::REVERSING:
+                vTaskDelay(pdMS_TO_TICKS(reverseDuration));
+                motorY.setSpeed(0);
+                state = MotorState::STOPPED;
+                break;
+
+            case MotorState::STOPPED:
+                state = MotorState::WAITING_FOR_RELEASE;
+                break;
+
+            case MotorState::WAITING_FOR_RELEASE:
+                if(!buttonIsPressed) {
+                    state = MotorState::IDLE; // Reset only when button is released
+                }
+                break;
+        }
+
+        buttonWasPressed = buttonIsPressed; // Track previous button state
+        vTaskDelay(pdMS_TO_TICKS(10));  // Use proper FreeRTOS macro
+    }
 }
 
 #endif

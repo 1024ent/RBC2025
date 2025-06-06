@@ -11,6 +11,7 @@
 #include "driver/gpio.h"
 #include "sdkconfig.h"
 #include "output_config.h"
+#include "motor_driver.h"
 
 #ifdef MASTER
 /**
@@ -31,6 +32,9 @@ void slave_init_output_instances(){
     /** THREAD INDICATOR **/
     gpio_pad_select_gpio(BLINK_GPIO1);
     gpio_set_direction(BLINK_GPIO1, GPIO_MODE_OUTPUT);
+    
+    pinMode(RELAY1_PIN, OUTPUT);        // Relay 1 control pin
+    pinMode(RELAY2_PIN, OUTPUT);        // Relay 2 control pin
 }
 #endif
   

@@ -29,7 +29,10 @@ void master_init_input_instances() {
  * @brief Initialising output instances for slave
  */
 void slave_init_input_instances() {
-
+    pinMode(LIM_Z1, INPUT_PULLUP);
+    pinMode(LIM_Z2, INPUT_PULLUP);
+    pinMode(LIM_Y1, INPUT_PULLUP);
+    pinMode(LIM_Y2, INPUT_PULLUP);
 }
 #endif
  

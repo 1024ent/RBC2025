@@ -177,10 +177,10 @@ void robot_movement_omni_v2(void *parameter)
             Serial.print(" R: "); Serial.println(rotation);
 
             // Calculate omni wheel velocities
-            float v1 = -x + y - rotation; // Front Right
-            float v2 =  x + y - rotation; // Rear Right
-            float v3 = -x + y + rotation; // Rear Left
-            float v4 =  x + y + rotation; // Front Left
+            float v1 = -x - y - rotation; // Front Right
+            float v2 =  x - y - rotation; // Rear Right
+            float v3 = -x + y - rotation; // Rear Left
+            float v4 =  x + y - rotation; // Front Left
 
             // Normalize velocity (if needed)
             float maxVal = max(max(abs(v1), abs(v2)), max(abs(v3), abs(v4)));
@@ -192,16 +192,16 @@ void robot_movement_omni_v2(void *parameter)
             }
 
             // Set direction and speed based on sign and magnitude
-            m1.set_direction(v4 < 0 ? HIGH : LOW);
+            m1.set_direction(v1 < 0 ? HIGH : LOW);
             m1.set_spin(constrain(abs(v4) * 2, MIN_SPEED, MAX_SPEED)); // *2 to scale to 255
 
-            m2.set_direction(v1 < 0 ? HIGH : LOW);
+            m2.set_direction(v2 < 0 ? HIGH : LOW);
             m2.set_spin(constrain(abs(v1) * 2, MIN_SPEED, MAX_SPEED));
 
-            m3.set_direction(v2 < 0 ? HIGH : LOW);
+            m3.set_direction(v3 < 0 ? HIGH : LOW);
             m3.set_spin(constrain(abs(v2) * 2, MIN_SPEED, MAX_SPEED));
 
-            m4.set_direction(v3 < 0 ? HIGH : LOW);
+            m4.set_direction(v4 < 0 ? HIGH : LOW);
             m4.set_spin(constrain(abs(v3) * 2, MIN_SPEED, MAX_SPEED));
         }
 
