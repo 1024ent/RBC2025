@@ -15,9 +15,9 @@
 #ifdef SLAVE
 
 #define MOTOR_STOP 0
-#define MOTOR_SLOW_1 127.5
-#define MOTOR_SLOW_2 125
-#define MOTOR_FAST_1 255
+#define MOTOR_SLOW_1 127.5 //125
+#define MOTOR_SLOW_2 127.5 //127.5
+#define MOTOR_FAST_1 255 //250
 #define MOTOR_FAST_2 255
 
 void shooting_mechanism(void *parameter) {
@@ -30,12 +30,12 @@ void shooting_mechanism(void *parameter) {
     digitalWrite(SHOOT_RELAY, HIGH);
 
     // SHOOTING MECHANISM MOTORS
-    // Set PWM frequency (5000Hz, commonly used for motor control)
-    ledcSetup(4, 5000, 8);  // Channel 0 for Left Motor PWM
-    ledcSetup(5, 5000, 8);  // Channel 1 for Right Motor PWM
-    
+    // Set PWM frequency (19000Hz, commonly used for motor control)
+    ledcSetup(4, 18000, 8);  // Channel 0 for Left Motor PWM
+    ledcSetup(5, 18000, 8);  // Channel 1 for Right Motor PWM
+        
     // Attach PWM pins to the channels
-    ledcAttachPin(SHOOT_PWM_L , 4);   // Left motor PWM
+    ledcAttachPin(SHOOT_PWM_L, 4);   // Left motor PWM
     ledcAttachPin(SHOOT_PWM_R, 5);  // Right motor PWM
 
     // Set initial motor speed to stop
@@ -45,7 +45,6 @@ void shooting_mechanism(void *parameter) {
     for (;;) {
         int currentBtn = buttonValue;
 
-        // 
         if (currentBtn == 7 && !isRunning && !resetRequired) {
             isRunning = true;
 
@@ -67,7 +66,7 @@ void shooting_mechanism(void *parameter) {
             digitalWrite(SHOOT_RELAY, HIGH);
 
             // --- Relay active duration ---
-            vTaskDelay(pdMS_TO_TICKS(3000));
+            vTaskDelay(pdMS_TO_TICKS(3500));
             digitalWrite(SHOOT_RELAY, HIGH);
 
             // --- Slow down motors ---

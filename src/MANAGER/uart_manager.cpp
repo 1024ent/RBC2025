@@ -25,8 +25,8 @@
 |TRIANGLE|   8   |     TBC       |
 |   L1   |   9   |     TBC       |
 |   R1   |   10  |     TBC       |
-|   L2   | pwm-- |  ROBOT BASE   |
-|   R2   | pwm++ |  ROBOT BASE   |
+|   L2   |   11  |  ROBOT BASE   |
+|   R2   |   12  |  ROBOT BASE   |
 |   L3   |  TBC  |     TBC       |
 |   R3   |  TBC  |     TBC       |
 |  L JOY | dir   |  ROBOT BASE   |
@@ -73,9 +73,9 @@
                 if (PS4.R1())
                     btn.send_btns(10);
                 if (PS4.L2())
-                {
-                    Serial.printf("L2 button at %d\n", PS4.L2Value());
-                }
+                    btn.send_btns(11);
+                if (PS4.R2())
+                    btn.send_btns(12);
                 if (PS4.L3())
                     Serial.println("L3 Button");
                 if (PS4.R3())

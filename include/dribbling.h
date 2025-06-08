@@ -13,11 +13,12 @@
 
 #ifdef SLAVE
 void dribbling_mechanism(void *parameter);
+void reload_mechanism(void *parameter);
 void lifting_mechanism(void *parameter);
 void lowering_mechanism(void *parameter);
 void yaw_forward_mechanism(void *parameter);
-void yaw_backward_mechanism(void *parameter);
-void ball_picking_mechanism(void *parameter);   // Semi-auto ball picking mechanism function
+void yaw_backward_mechanism(void *parameter);  
+void semi_auto(void *parameter);
 
 #endif
 
