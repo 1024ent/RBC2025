@@ -3,8 +3,6 @@
  * @brief Controlling robot movement through PS4 Controllers
  * @copyright UMPSA ROBOTICS
  * @license Apache-2.0
- * @author Nazwa Najmuddin [ELPROG]
- * @author Kishan Kumar [ELPROG]
  * @author Loo Hui Kie [ELPROG]
  * @author Lee Wen Hui [ELPROG]
  */
@@ -143,7 +141,7 @@ void robot_movement_omni(void *parameter)
             }
         }
 
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(10));  // Use proper FreeRTOS macro
     }
 }
 
@@ -172,15 +170,15 @@ void robot_movement_omni_v2(void *parameter)
             if (abs(rotation) < DEADZONE) rotation = 0;
 
             // Debugging joystick input
-            Serial.print("X: "); Serial.print(x);
+            Serial.print(" X: "); Serial.print(x);
             Serial.print(" Y: "); Serial.print(y);
             Serial.print(" R: "); Serial.println(rotation);
 
             // Calculate omni wheel velocities
-            float v1 = -x - y - rotation; // Front Right
-            float v2 =  x - y - rotation; // Rear Right
-            float v3 = -x + y - rotation; // Rear Left
-            float v4 =  x + y - rotation; // Front Left
+            float v1 =  + x - y + rotation; // Front Right
+            float v2 =  - x - y + rotation; // Rear Right
+            float v3 =  - x + y + rotation; // Rear Left
+            float v4 =  + x + y + rotation; // Front Left
 
             // Normalize velocity (if needed)
             float maxVal = max(max(abs(v1), abs(v2)), max(abs(v3), abs(v4)));
@@ -206,7 +204,7 @@ void robot_movement_omni_v2(void *parameter)
         }
 
         // Avoid hogging CPU in RTOS
-        vTaskDelay(10 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(10));  // Use proper FreeRTOS macro
     }
 }
 

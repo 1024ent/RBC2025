@@ -49,15 +49,14 @@ void master_init_output_instances();
 #define     SHOOT_RELAY         GPIO_NUM_5  // Check Pin
 
 /** DRIBBLING MECHANISM **/
-// BALL PICKING MECHANISM
 #define     PWM_Z         GPIO_NUM_18
 #define     DIR_Z         GPIO_NUM_25
 #define     PWM_Y         GPIO_NUM_14
 #define     DIR_Y         GPIO_NUM_27
 
 // BALL DRIBBLING MECHANISM
-#define     RELAY1_PIN          GPIO_NUM_26  // GPIO 26 connected to Relay 1
-#define     RELAY2_PIN          GPIO_NUM_27
+#define     RELAY1_PIN          GPIO_NUM_22  
+#define     RELAY2_PIN          GPIO_NUM_23
 
 /** UART2 | Receiving: ESP32 MB **/
 #define UART2_TX_PIN GPIO_NUM_17  
